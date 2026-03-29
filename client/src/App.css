@@ -1,0 +1,51 @@
+/* App specific styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    min-height: 70px;
+    /* Allow growth */
+    height: auto;
+    z-index: 1000;
+    background: #3498db;
+    /* Solid rich blue */
+    background: linear-gradient(to right, #4a90e2, #0077ccd9);
+    /* Subtle gradient for premium feel */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: center;
+    /* Centers the inner container */
+    padding: 0;
+    /* Remove padding here, let container handle it */
+    transition: height 0.3s ease;
+}
+
+/* Ensure container takes full height of navbar for alignment */
+/* Ensure container takes full height of navbar for alignment */
+.navbar .container {
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 20px;
+    /* Override global container 90px padding */
+}
+
+.nav-links a {
+    margin-left: 2rem;
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.nav-links a:hover {
+    color: #ffffff;
+    opacity: 1;
+    transform: translateY(-1px);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}

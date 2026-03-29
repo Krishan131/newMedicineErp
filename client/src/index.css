@@ -1,0 +1,416 @@
+:root {
+  /* --- Premium Brand Palette --- */
+  --primary-color: #3b82f6;
+  /* Vibrant Royal Blue */
+  --primary-glow: rgba(59, 130, 246, 0.4);
+  --secondary-color: #64748b;
+  /* Cool Slate */
+  --success-color: #10b981;
+  /* Emerald */
+  --danger-color: #ef4444;
+  /* Rose */
+  --warning-color: #f59e0b;
+  /* Amber */
+
+  /* Light Mode Base */
+  --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  --glass-bg: rgba(255, 255, 255, 0.85);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --text-primary: #1e293b;
+  /* Slate 900 */
+  --text-secondary: #475569;
+  /* Slate 600 */
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.05);
+
+  /* Fonts */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+}
+
+/* --- Dark Mode Palette --- */
+body.dark-mode {
+  --primary-color: #60a5fa;
+  /* Lighter Blue */
+  --primary-glow: rgba(96, 165, 250, 0.4);
+  --secondary-color: #94a3b8;
+  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  /* Deep Midnight */
+  --glass-bg: rgba(30, 41, 59, 0.75);
+  /* Translucent Slate 800 */
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text-primary: #f8fafc;
+  /* Slate 50 */
+  --text-secondary: #cbd5e1;
+  /* Slate 300 */
+  --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.3);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: all 0.3s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s;
+}
+
+ul {
+  list-style: none;
+}
+
+/* --- Component: Glass Card (The Core of the Look) --- */
+.card,
+.summary-card,
+.billing-section,
+.inventory-container {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  /* Safari support */
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  /* Smooth aesthetic */
+  box-shadow: var(--card-shadow);
+  padding: 1.5rem;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Component: Buttons --- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  font-size: 0.95rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), #2563eb);
+  color: white;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px var(--primary-glow);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger-color), #dc2626);
+  color: white;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, var(--success-color), #059669);
+  color: white;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+/* Remove glow in dark mode */
+body.dark-mode .btn-primary,
+body.dark-mode .btn-danger,
+body.dark-mode .btn-success {
+  box-shadow: none !important;
+}
+
+body.dark-mode .btn-primary:hover,
+body.dark-mode .btn-danger:hover,
+body.dark-mode .btn-success:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+  /* Subtle shadow on hover only */
+  filter: brightness(1.1);
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* --- Component: Inputs & Selects --- */
+input,
+select {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  /* Very subtle bg */
+  border: 1px solid var(--secondary-color);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+/* Light mode specific input bg override for readability */
+body:not(.dark-mode) input,
+body:not(.dark-mode) select {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+  background: var(--glass-bg);
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* --- Component: Modern Table --- */
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+}
+
+table {
+  width: 100%;
+  border-collapse: separate;
+  /* Allows border radius on rows */
+  border-spacing: 0;
+  margin-top: 0.5rem;
+}
+
+th {
+  padding: 16px;
+  text-align: left;
+  font-family: var(--font-heading);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: var(--secondary-color);
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+td {
+  padding: 16px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: rgba(var(--primary-color), 0.05);
+}
+
+/* --- Utilities & Badges --- */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--success-color);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--danger-color);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 100px 24px 40px;
+  /* Top padding for fixed navbar */
+}
+
+/* --- Animations --- */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Layout Grids (Preserved & Enhanced) --- */
+.grid-responsive {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  align-items: stretch;
+  /* Cards should be same height */
+}
+
+.inventory-container {
+  display: grid;
+  grid-template-columns: minmax(320px, 1fr) 3fr;
+  gap: 24px;
+  align-items: start;
+  /* critical for column alignment */
+}
+
+.billing-container {
+  display: grid;
+  grid-template-columns: 1.2fr 1.8fr;
+  gap: 24px;
+  align-items: start;
+  /* Prevents left panel from stretching oddly */
+}
+
+/* --- Navbar (Glass Effect) --- */
+.navbar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--glass-border);
+  z-index: 1000;
+  padding: 0;
+  /* Let container handle padding */
+  height: 70px;
+  /* Fixed height for consistency */
+  display: flex;
+  align-items: center;
+  transition: all 0.3s;
+}
+
+body.dark-mode .navbar {
+  background: rgba(15, 23, 42, 0.85);
+  /* Darker glass for dark mode */
+}
+
+.navbar .container {
+  padding: 0 24px;
+  /* Reset standard container padding within navbar */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-links a {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.nav-links a:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--primary-color);
+}
+
+body.dark-mode .nav-links a {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .nav-links a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--primary-color);
+}
+
+/* --- Mobile Responsiveness --- */
+.hamburger {
+  display: none;
+  /* Hidden by default on desktop */
+}
+
+@media (max-width: 768px) {
+
+  .inventory-container,
+  .billing-container {
+    grid-template-columns: 1fr;
+  }
+
+  .navbar-header {
+    width: 100%;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  /* Show only on mobile */
+
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    padding: 20px;
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-links.active {
+    display: flex;
+  }
+}
