@@ -1,6 +1,8 @@
 const Sales = require('../models/Sales');
 const Medicine = require('../models/Medicine');
 
+const normalizePhone = (value = '') => value.toString().replace(/\D/g, '');
+
 // @route   POST api/sales
 // @desc    Create new invoice and update inventory
 // @access  Private (Staff/Admin)
@@ -8,11 +10,24 @@ exports.createInvoice = async (req, res) => {
     const { customerName, customerContact, items, paymentMethod } = req.body;
 
     try {
+        if (!customerName || !Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ msg: 'Customer name and at least one item are required' });
+        }
+
+        const normalizedCustomerContact = customerContact ? normalizePhone(customerContact) : '';
+        if (customerContact && normalizedCustomerContact.length < 10) {
+            return res.status(400).json({ msg: 'Please provide a valid customer contact number' });
+        }
+
         let totalAmount = 0;
         const processedItems = [];
 
         // Check stock and calculate total
         for (const item of items) {
+            if (!item.medicine || !item.quantity || item.quantity <= 0) {
+                return res.status(400).json({ msg: 'Each item must have medicine and quantity > 0' });
+            }
+
             const medicine = await Medicine.findById(item.medicine);
 
             if (!medicine) {
@@ -35,6 +50,9 @@ exports.createInvoice = async (req, res) => {
             processedItems.push({
                 medicine: medicine._id,
                 name: medicine.name,
+                batchNumber: medicine.batchNumber,
+                expiryDate: medicine.expiryDate,
+                purchaseDate: new Date(),
                 quantity: item.quantity,
                 price: medicine.price,
                 total: medicine.price * item.quantity
@@ -45,7 +63,7 @@ exports.createInvoice = async (req, res) => {
 
         const newSales = new Sales({
             customerName,
-            customerContact,
+            customerContact: normalizedCustomerContact,
             items: processedItems,
             totalAmount,
             paymentMethod,

@@ -6,10 +6,7 @@ const connectDB = require('./config/db');
 dotenv.config();
 
 // Connect Database
-// Connect Database
 connectDB();
-
-
 
 const app = express();
 
@@ -25,13 +22,9 @@ app.get('/', (req, res) => {
 // Define Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/medicines', require('./routes/medicineRoutes'));
-app.use('/api/medicines', require('./routes/medicineRoutes'));
 app.use('/api/sales', require('./routes/salesRoutes'));
 app.use('/api/customer', require('./routes/customerRoutes'));
 app.use('/api/whatsapp', require('./routes/whatsappRoutes'));
-
-
-
 
 const PORT = process.env.PORT || 5000;
 

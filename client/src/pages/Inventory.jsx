@@ -98,14 +98,22 @@ const Inventory = () => {
         uploadData.append('file', selectedFile);
 
         try {
-            await api.post('/medicines/upload', uploadData, {
+            const res = await api.post('/medicines/upload', uploadData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
-            alert('Bulk upload successful!');
+
+            alert(res.data?.msg || 'Bulk upload successful!');
             fetchMedicines();
         } catch (err) {
             console.error(err);
-            alert('Error uploading CSV');
+            const errorMsg = err.response?.data?.msg || 'Error uploading CSV';
+            const details = Array.isArray(err.response?.data?.errors)
+                ? `\n\nDetails:\n${err.response.data.errors.slice(0, 3).join('\n')}`
+                : '';
+            alert(`${errorMsg}${details}`);
+        } finally {
+            // Reset input so user can re-upload the same file after fixing it.
+            e.target.value = '';
         }
     };
 

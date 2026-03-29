@@ -28,6 +28,7 @@ const Navbar = () => {
                     <Link to="/">Dashboard</Link>
                     <Link to="/inventory">Inventory</Link>
                     <Link to="/low-stock">Low Stock</Link>
+                    <Link to="/retailer/profile">Profile</Link>
                     <button onClick={toggleTheme} style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#fff' }} title="Toggle Dark Mode">
                         {isDarkMode ? '🌞' : '🌙'}
                     </button>

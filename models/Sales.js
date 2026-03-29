@@ -18,6 +18,15 @@ const SalesSchema = new mongoose.Schema({
                 type: String,
                 required: true
             },
+            batchNumber: {
+                type: String
+            },
+            expiryDate: {
+                type: Date
+            },
+            purchaseDate: {
+                type: Date
+            },
             quantity: {
                 type: Number,
                 required: true

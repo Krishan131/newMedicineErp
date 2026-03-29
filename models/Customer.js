@@ -15,40 +15,35 @@ const GeoPointSchema = new mongoose.Schema({
                 const [longitude, latitude] = coords;
                 return longitude >= -180 && longitude <= 180 && latitude >= -90 && latitude <= 90;
             },
-            message: 'Shop location coordinates must be [longitude, latitude]'
+            message: 'Customer location coordinates must be [longitude, latitude]'
         }
     }
 }, { _id: false });
 
-const UserSchema = new mongoose.Schema({
-    username: {
+const CustomerSchema = new mongoose.Schema({
+    name: {
         type: String,
         required: true,
-        unique: true
+        trim: true
+    },
+    phone: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
     },
     email: {
         type: String,
-        required: true,
+        trim: true,
+        lowercase: true,
+        sparse: true,
         unique: true
     },
-    shopName: {
+    password: {
         type: String,
-        required: true, // Making it required for all new retailer registrations
-        default: 'My Medicine Shop' // Default for existing users to avoid breakage
+        required: true
     },
-    shopPhone: {
-        type: String,
-        default: ''
-    },
-    shopAddress: {
-        type: String,
-        default: ''
-    },
-    shopDescription: {
-        type: String,
-        default: ''
-    },
-    shopLocation: {
+    location: {
         type: GeoPointSchema,
         default: null
     },
@@ -56,25 +51,12 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    isLive: {
-        type: Boolean,
-        default: false
-    },
     locationUpdatedAt: {
         type: Date,
         default: null
-    },
-    password: {
-        type: String,
-        required: true
-    },
-    role: {
-        type: String,
-        enum: ['admin', 'staff'],
-        default: 'staff'
     }
 }, { timestamps: true });
 
-UserSchema.index({ shopLocation: '2dsphere' });
+CustomerSchema.index({ location: '2dsphere' });
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('Customer', CustomerSchema);

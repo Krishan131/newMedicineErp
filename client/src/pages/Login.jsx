@@ -7,12 +7,18 @@ const Login = () => {
     const [loginType, setLoginType] = useState('retailer');
 
     // Auth State
-    const [formData, setFormData] = useState({ email: '', password: '', mobile: '' });
+    const [formData, setFormData] = useState({
+        email: '',
+        password: '',
+        customerName: '',
+        customerPhone: '',
+        customerPassword: ''
+    });
     const [error, setError] = useState('');
-    const { login } = useContext(AuthContext);
+    const { login, customerLogin } = useContext(AuthContext);
     const navigate = useNavigate();
 
-    const { email, password, mobile } = formData;
+    const { email, password, customerName, customerPhone, customerPassword } = formData;
 
     const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -28,15 +34,17 @@ const Login = () => {
                 setError(res.msg);
             }
         } else {
-            // Customer Login Logic (mock for now until backend route is ready)
-            if (mobile.length < 10) {
-                setError('Please enter a valid mobile number');
+            if (customerPhone.replace(/\D/g, '').length < 10) {
+                setError('Please enter a valid phone number');
                 return;
             }
-            // For now, redirect to Customer Dashboard
-            // We will replace this with real API call next step
-            localStorage.setItem('customerMobile', mobile);
-            navigate('/customer/dashboard');
+
+            const res = await customerLogin(customerName, customerPhone, customerPassword);
+            if (res.success) {
+                navigate('/customer/dashboard');
+            } else {
+                setError(res.msg);
+            }
         }
     };
 
@@ -98,31 +106,57 @@ const Login = () => {
                                 </div>
                             </>
                         ) : (
-                            <div style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem' }}>Mobile Number</label>
-                                <input
-                                    type="text"
-                                    name="mobile"
-                                    value={mobile}
-                                    onChange={onChange}
-                                    required
-                                    placeholder="Enter 10-digit number"
-                                    pattern="[0-9]{10}"
-                                />
-                                <small style={{ display: 'block', marginTop: '5px', opacity: 0.6 }}>
-                                    Enter the number you used for billing.
-                                </small>
-                            </div>
+                            <>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
+                                    <input
+                                        type="text"
+                                        name="customerName"
+                                        value={customerName}
+                                        onChange={onChange}
+                                        required
+                                        placeholder="Enter your name"
+                                    />
+                                </div>
+                                <div style={{ marginBottom: '1rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Phone Number</label>
+                                    <input
+                                        type="text"
+                                        name="customerPhone"
+                                        value={customerPhone}
+                                        onChange={onChange}
+                                        required
+                                        placeholder="Enter your phone number"
+                                    />
+                                </div>
+                                <div style={{ marginBottom: '1.5rem' }}>
+                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Password</label>
+                                    <input
+                                        type="password"
+                                        name="customerPassword"
+                                        value={customerPassword}
+                                        onChange={onChange}
+                                        required
+                                        placeholder="Enter your password"
+                                    />
+                                </div>
+                            </>
                         )}
 
                         <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
-                            {loginType === 'retailer' ? 'Login' : 'View History'}
+                            {loginType === 'retailer' ? 'Login' : 'Customer Login'}
                         </button>
                     </form>
 
                     {loginType === 'retailer' && (
                         <p style={{ marginTop: '1rem', textAlign: 'center' }}>
                             Don't have an account? <Link to="/register" style={{ color: 'var(--primary-color)' }}>Register</Link>
+                        </p>
+                    )}
+
+                    {loginType === 'customer' && (
+                        <p style={{ marginTop: '1rem', textAlign: 'center' }}>
+                            New customer? <Link to="/customer/register" style={{ color: 'var(--primary-color)' }}>Create account</Link>
                         </p>
                     )}
                 </div>
