@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuthContext from '../../context/AuthContext';
+import './CustomerRegister.css';
 
 const CustomerRegister = () => {
     const [formData, setFormData] = useState({
@@ -47,45 +48,49 @@ const CustomerRegister = () => {
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-            <div className="card" style={{ width: '420px' }}>
-                <h2 style={{ textAlign: 'center', marginBottom: '0.5rem', color: 'var(--primary-color)' }}>Customer Account</h2>
-                <h4 style={{ textAlign: 'center', marginBottom: '1.5rem', opacity: 0.8 }}>Create your profile</h4>
-
-                {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
-
-                <form onSubmit={onSubmit}>
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
-                        <input type="text" name="name" value={name} onChange={onChange} required placeholder="Enter your name" />
+        <div className="customer-register-page">
+            <div className="customer-register-shell">
+                <div className="card customer-register-card">
+                    <div className="customer-register-header">
+                        <h2>Customer Account</h2>
+                        <p>Create your profile</p>
                     </div>
 
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Phone Number</label>
-                        <input type="text" name="phone" value={phone} onChange={onChange} required placeholder="Enter your phone number" />
-                    </div>
+                    {error && <div className="customer-register-error">{error}</div>}
 
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Email (optional)</label>
-                        <input type="email" name="email" value={email} onChange={onChange} placeholder="Enter your email" />
-                    </div>
+                    <form onSubmit={onSubmit}>
+                        <div className="customer-register-field">
+                            <label>Name</label>
+                            <input type="text" name="name" value={name} onChange={onChange} required placeholder="Enter your name" />
+                        </div>
 
-                    <div style={{ marginBottom: '1rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Password</label>
-                        <input type="password" name="password" value={password} onChange={onChange} required placeholder="Create a password" />
-                    </div>
+                        <div className="customer-register-field">
+                            <label>Phone Number</label>
+                            <input type="text" name="phone" value={phone} onChange={onChange} required placeholder="Enter your phone number" />
+                        </div>
 
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>Confirm Password</label>
-                        <input type="password" name="confirmPassword" value={confirmPassword} onChange={onChange} required placeholder="Re-enter your password" />
-                    </div>
+                        <div className="customer-register-field">
+                            <label>Email (optional)</label>
+                            <input type="email" name="email" value={email} onChange={onChange} placeholder="Enter your email" />
+                        </div>
 
-                    <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Create Account</button>
-                </form>
+                        <div className="customer-register-field">
+                            <label>Password</label>
+                            <input type="password" name="password" value={password} onChange={onChange} required placeholder="Create a password" />
+                        </div>
 
-                <p style={{ marginTop: '1rem', textAlign: 'center' }}>
-                    Already have an account? <Link to="/login" style={{ color: 'var(--primary-color)' }}>Login</Link>
-                </p>
+                        <div className="customer-register-field is-last">
+                            <label>Confirm Password</label>
+                            <input type="password" name="confirmPassword" value={confirmPassword} onChange={onChange} required placeholder="Re-enter your password" />
+                        </div>
+
+                        <button type="submit" className="btn btn-primary customer-register-submit">Create Account</button>
+                    </form>
+
+                    <p className="customer-register-footer">
+                        Already have an account? <Link to="/login">Login</Link>
+                    </p>
+                </div>
             </div>
         </div>
     );

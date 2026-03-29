@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
 import AuthContext from '../../context/AuthContext';
+import './CustomerProfile.css';
 
 const getInitials = (name = '') => {
     const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -256,205 +257,176 @@ const CustomerProfile = () => {
     };
 
     if (customerLoading || loading) {
-        return <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>Loading profile...</div>;
+        return <div className="container customer-profile-loading">Loading profile...</div>;
     }
 
     return (
-        <div className="container" style={{ marginTop: '2rem', paddingBottom: '3rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h2 style={{ margin: 0 }}>Customer Profile</h2>
-                <button className="btn btn-secondary" onClick={() => navigate('/customer/dashboard')}>
-                    Back to Dashboard
-                </button>
-            </div>
-
-            <div
-                className="card"
-                style={{
-                    marginBottom: '1.25rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
-                    padding: '1rem 1.25rem'
-                }}
-            >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
-                    <div
-                        style={{
-                            width: '56px',
-                            height: '56px',
-                            borderRadius: '50%',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                            color: '#fff',
-                            fontWeight: '700',
-                            fontSize: '1rem',
-                            letterSpacing: '0.5px'
-                        }}
-                    >
-                        {getInitials(profileForm.name || customer?.name)}
-                    </div>
-
+        <div className="customer-profile-page">
+            <div className="container customer-profile-container">
+                <div className="customer-profile-header">
                     <div>
-                        <div style={{ fontWeight: '700', fontSize: '1.05rem', lineHeight: 1.2 }}>
-                            {profileForm.name || customer?.name || 'Customer'}
+                        <h2>Customer Profile</h2>
+                        <p>Manage account details, security, and location preferences</p>
+                    </div>
+                    <button className="btn customer-profile-back-btn" onClick={() => navigate('/customer/dashboard')}>
+                        Back to Dashboard
+                    </button>
+                </div>
+
+                <div className="card customer-profile-hero">
+                    <div className="customer-profile-identity">
+                        <div className="customer-profile-avatar">
+                            {getInitials(profileForm.name || customer?.name)}
                         </div>
-                        <div style={{ opacity: 0.75, fontSize: '0.9rem', marginTop: '2px' }}>
-                            {profileForm.phone || customer?.phone || 'No phone'}
+
+                        <div>
+                            <div className="customer-profile-name">
+                                {profileForm.name || customer?.name || 'Customer'}
+                            </div>
+                            <div className="customer-profile-phone">
+                                {profileForm.phone || customer?.phone || 'No phone'}
+                            </div>
+                            <div className="customer-profile-email">
+                                {profileForm.email || 'No email added'}
+                            </div>
                         </div>
-                        <div style={{ opacity: 0.65, fontSize: '0.85rem', marginTop: '2px' }}>
-                            {profileForm.email || 'No email added'}
-                        </div>
+                    </div>
+
+                    <div className="customer-profile-account-badge">
+                        Active Account
                     </div>
                 </div>
 
-                <div
-                    style={{
-                        padding: '0.35rem 0.6rem',
-                        borderRadius: '999px',
-                        fontSize: '0.8rem',
-                        fontWeight: '600',
-                        background: 'rgba(34, 197, 94, 0.14)',
-                        color: '#15803d',
-                        whiteSpace: 'nowrap'
-                    }}
-                >
-                    Active Account
-                </div>
-            </div>
+                {error && <div className="customer-profile-alert is-error">{error}</div>}
+                {profileMessage && <div className="customer-profile-alert is-success">{profileMessage}</div>}
+                {passwordMessage && <div className="customer-profile-alert is-success">{passwordMessage}</div>}
+                {locationMessage && <div className="customer-profile-alert is-success">{locationMessage}</div>}
 
-            {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</div>}
-            {profileMessage && <div style={{ color: 'var(--success-color)', marginBottom: '1rem' }}>{profileMessage}</div>}
-            {passwordMessage && <div style={{ color: 'var(--success-color)', marginBottom: '1rem' }}>{passwordMessage}</div>}
-            {locationMessage && <div style={{ color: 'var(--success-color)', marginBottom: '1rem' }}>{locationMessage}</div>}
+                <div className="grid-responsive customer-profile-grid">
+                    <div className="card customer-profile-card">
+                        <h3>Account Details</h3>
+                        <form onSubmit={onProfileSubmit}>
+                            <div className="form-group">
+                                <label>Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={profileForm.name}
+                                    onChange={onProfileChange}
+                                    required
+                                />
+                            </div>
 
-            <div className="grid-responsive">
-                <div className="card">
-                    <h3 style={{ marginBottom: '1rem' }}>Account Details</h3>
-                    <form onSubmit={onProfileSubmit}>
-                        <div className="form-group">
-                            <label>Name</label>
-                            <input
-                                type="text"
-                                name="name"
-                                value={profileForm.name}
-                                onChange={onProfileChange}
-                                required
-                            />
-                        </div>
+                            <div className="form-group">
+                                <label>Phone Number</label>
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    value={profileForm.phone}
+                                    disabled
+                                />
+                                <small className="customer-profile-note">Phone number is used for login and purchase linking.</small>
+                            </div>
 
-                        <div className="form-group">
-                            <label>Phone Number</label>
-                            <input
-                                type="text"
-                                name="phone"
-                                value={profileForm.phone}
-                                disabled
-                            />
-                            <small style={{ opacity: 0.75 }}>Phone number is used for login and purchase linking.</small>
-                        </div>
+                            <div className="form-group">
+                                <label>Email (optional)</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={profileForm.email}
+                                    onChange={onProfileChange}
+                                    placeholder="Enter email"
+                                />
+                            </div>
 
-                        <div className="form-group">
-                            <label>Email (optional)</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={profileForm.email}
-                                onChange={onProfileChange}
-                                placeholder="Enter email"
-                            />
-                        </div>
+                            <button type="submit" className="btn btn-primary" disabled={profileSaving}>
+                                {profileSaving ? 'Saving...' : 'Save Profile'}
+                            </button>
+                        </form>
+                    </div>
 
-                        <button type="submit" className="btn btn-primary" disabled={profileSaving}>
-                            {profileSaving ? 'Saving...' : 'Save Profile'}
+                    <div className="card customer-profile-card">
+                        <h3>Change Password</h3>
+                        <form onSubmit={onPasswordSubmit}>
+                            <div className="form-group">
+                                <label>Current Password</label>
+                                <input
+                                    type="password"
+                                    name="currentPassword"
+                                    value={passwordForm.currentPassword}
+                                    onChange={onPasswordChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>New Password</label>
+                                <input
+                                    type="password"
+                                    name="newPassword"
+                                    value={passwordForm.newPassword}
+                                    onChange={onPasswordChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    name="confirmPassword"
+                                    value={passwordForm.confirmPassword}
+                                    onChange={onPasswordChange}
+                                    required
+                                />
+                            </div>
+
+                            <button type="submit" className="btn btn-primary" disabled={passwordSaving}>
+                                {passwordSaving ? 'Updating...' : 'Update Password'}
+                            </button>
+                        </form>
+                    </div>
+
+                    <div className="card customer-profile-card customer-profile-location-card">
+                        <h3>Location Service</h3>
+
+                        <button type="button" className="btn btn-primary" onClick={onDetectAndSaveLocation} disabled={locationSaving}>
+                            {locationSaving ? 'Detecting...' : 'Detect My Location'}
                         </button>
-                    </form>
-                </div>
 
-                <div className="card">
-                    <h3 style={{ marginBottom: '1rem' }}>Change Password</h3>
-                    <form onSubmit={onPasswordSubmit}>
-                        <div className="form-group">
-                            <label>Current Password</label>
-                            <input
-                                type="password"
-                                name="currentPassword"
-                                value={passwordForm.currentPassword}
-                                onChange={onPasswordChange}
-                                required
-                            />
+                        <div className="customer-profile-location-panel">
+                            {locationData.location ? (
+                                <>
+                                    <div className="customer-profile-location-row"><strong>Latitude:</strong> {locationData.location.latitude.toFixed(6)}</div>
+                                    <div className="customer-profile-location-row"><strong>Longitude:</strong> {locationData.location.longitude.toFixed(6)}</div>
+                                    {locationData.locationUpdatedAt && (
+                                        <div className="customer-profile-muted">
+                                            Updated: {new Date(locationData.locationUpdatedAt).toLocaleString()}
+                                        </div>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="customer-profile-muted">Location not detected yet.</div>
+                            )}
                         </div>
 
-                        <div className="form-group">
-                            <label>New Password</label>
+                        <label className="customer-profile-toggle-label">
                             <input
-                                type="password"
-                                name="newPassword"
-                                value={passwordForm.newPassword}
-                                onChange={onPasswordChange}
-                                required
+                                type="checkbox"
+                                checked={locationData.isLocationEnabled}
+                                onChange={(e) => onToggleLocationService(e.target.checked)}
+                                disabled={locationSaving}
+                                className="customer-profile-toggle-input"
                             />
-                        </div>
+                            Enable location service for nearby medicine search
+                        </label>
 
-                        <div className="form-group">
-                            <label>Confirm New Password</label>
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                value={passwordForm.confirmPassword}
-                                onChange={onPasswordChange}
-                                required
-                            />
-                        </div>
-
-                        <button type="submit" className="btn btn-primary" disabled={passwordSaving}>
-                            {passwordSaving ? 'Updating...' : 'Update Password'}
-                        </button>
-                    </form>
-                </div>
-
-                <div className="card">
-                    <h3 style={{ marginBottom: '1rem' }}>Location Service</h3>
-
-                    <button type="button" className="btn btn-primary" onClick={onDetectAndSaveLocation} disabled={locationSaving}>
-                        {locationSaving ? 'Detecting...' : 'Detect My Location'}
-                    </button>
-
-                    <div style={{ marginTop: '1rem', marginBottom: '1rem', fontSize: '0.9rem' }}>
-                        {locationData.location ? (
-                            <>
-                                <div><strong>Latitude:</strong> {locationData.location.latitude.toFixed(6)}</div>
-                                <div><strong>Longitude:</strong> {locationData.location.longitude.toFixed(6)}</div>
-                                {locationData.locationUpdatedAt && (
-                                    <div style={{ opacity: 0.7, marginTop: '4px' }}>
-                                        Updated: {new Date(locationData.locationUpdatedAt).toLocaleString()}
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <div style={{ opacity: 0.75 }}>Location not detected yet.</div>
+                        {!locationData.isLocationEnabled && (
+                            <small className="customer-profile-note">
+                                Location service must be enabled to search medicines from nearby live shops.
+                            </small>
                         )}
                     </div>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
-                        <input
-                            type="checkbox"
-                            checked={locationData.isLocationEnabled}
-                            onChange={(e) => onToggleLocationService(e.target.checked)}
-                            disabled={locationSaving}
-                            style={{ width: '18px', height: '18px', marginBottom: 0 }}
-                        />
-                        Enable location service for nearby medicine search
-                    </label>
-
-                    {!locationData.isLocationEnabled && (
-                        <small style={{ display: 'block', marginTop: '8px', opacity: 0.75 }}>
-                            Location service must be enabled to search medicines from nearby live shops.
-                        </small>
-                    )}
                 </div>
             </div>
         </div>

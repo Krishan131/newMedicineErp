@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import AuthContext from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import './Login.css';
 
 const Login = () => {
     // Tab State: 'retailer' or 'customer'
@@ -49,66 +50,47 @@ const Login = () => {
     };
 
     return (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', flexDirection: 'column' }}>
-            <div className="card" style={{ width: '380px', padding: '0' }}>
-                {/* Tabs */}
-                <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)' }}>
+        <div className="portal-login-page">
+            <div className="card portal-login-card">
+                <div className="portal-login-tabs">
                     <div
                         onClick={() => setLoginType('retailer')}
-                        style={{
-                            flex: 1,
-                            padding: '15px',
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            background: loginType === 'retailer' ? 'var(--card-bg)' : 'rgba(0,0,0,0.05)',
-                            color: loginType === 'retailer' ? 'var(--primary-color)' : 'var(--text-secondary)',
-                            fontWeight: loginType === 'retailer' ? 'bold' : 'normal',
-                            borderTopLeftRadius: '15px'
-                        }}
+                        className={`portal-login-tab ${loginType === 'retailer' ? 'is-active' : ''}`}
                     >
                         Retailer
                     </div>
                     <div
                         onClick={() => setLoginType('customer')}
-                        style={{
-                            flex: 1,
-                            padding: '15px',
-                            textAlign: 'center',
-                            cursor: 'pointer',
-                            background: loginType === 'customer' ? 'var(--card-bg)' : 'rgba(0,0,0,0.05)',
-                            color: loginType === 'customer' ? 'var(--primary-color)' : 'var(--text-secondary)',
-                            fontWeight: loginType === 'customer' ? 'bold' : 'normal',
-                            borderTopRightRadius: '15px'
-                        }}
+                        className={`portal-login-tab ${loginType === 'customer' ? 'is-active' : ''}`}
                     >
                         Customer
                     </div>
                 </div>
 
-                <div style={{ padding: '2rem' }}>
-                    <h2 style={{ textAlign: 'center', marginBottom: '0.5rem', color: 'var(--primary-color)' }}>Medicine ERP</h2>
-                    <h4 style={{ textAlign: 'center', marginBottom: '1.5rem', opacity: 0.8 }}>
+                <div className="portal-login-body">
+                    <h2>Medicine ERP</h2>
+                    <h4>
                         {loginType === 'retailer' ? 'Shop Owner Login' : 'Customer Portal'}
                     </h4>
 
-                    {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem', textAlign: 'center' }}>{error}</div>}
+                    {error && <div className="portal-login-error">{error}</div>}
 
                     <form onSubmit={onSubmit}>
                         {loginType === 'retailer' ? (
                             <>
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Email</label>
+                                <div className="portal-login-field">
+                                    <label>Email</label>
                                     <input type="email" name="email" value={email} onChange={onChange} required />
                                 </div>
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Password</label>
+                                <div className="portal-login-field is-last">
+                                    <label>Password</label>
                                     <input type="password" name="password" value={password} onChange={onChange} required />
                                 </div>
                             </>
                         ) : (
                             <>
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Name</label>
+                                <div className="portal-login-field">
+                                    <label>Name</label>
                                     <input
                                         type="text"
                                         name="customerName"
@@ -118,8 +100,8 @@ const Login = () => {
                                         placeholder="Enter your name"
                                     />
                                 </div>
-                                <div style={{ marginBottom: '1rem' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Phone Number</label>
+                                <div className="portal-login-field">
+                                    <label>Phone Number</label>
                                     <input
                                         type="text"
                                         name="customerPhone"
@@ -129,8 +111,8 @@ const Login = () => {
                                         placeholder="Enter your phone number"
                                     />
                                 </div>
-                                <div style={{ marginBottom: '1.5rem' }}>
-                                    <label style={{ display: 'block', marginBottom: '0.5rem' }}>Password</label>
+                                <div className="portal-login-field is-last">
+                                    <label>Password</label>
                                     <input
                                         type="password"
                                         name="customerPassword"
@@ -143,20 +125,20 @@ const Login = () => {
                             </>
                         )}
 
-                        <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>
+                        <button type="submit" className="btn btn-primary portal-login-submit">
                             {loginType === 'retailer' ? 'Login' : 'Customer Login'}
                         </button>
                     </form>
 
                     {loginType === 'retailer' && (
-                        <p style={{ marginTop: '1rem', textAlign: 'center' }}>
-                            Don't have an account? <Link to="/register" style={{ color: 'var(--primary-color)' }}>Register</Link>
+                        <p className="portal-login-footer">
+                            Don't have an account? <Link to="/register">Register</Link>
                         </p>
                     )}
 
                     {loginType === 'customer' && (
-                        <p style={{ marginTop: '1rem', textAlign: 'center' }}>
-                            New customer? <Link to="/customer/register" style={{ color: 'var(--primary-color)' }}>Create account</Link>
+                        <p className="portal-login-footer">
+                            New customer? <Link to="/customer/register">Create account</Link>
                         </p>
                     )}
                 </div>

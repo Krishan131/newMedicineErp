@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+.health-chatbot {
+    padding: 0;
+    overflow: hidden;
+    border-radius: 20px;
+    font-family: 'Manrope', sans-serif;
+    border: 1px solid color-mix(in srgb, var(--glass-border) 95%, transparent);
+}
+
+.health-chatbot__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.9rem;
+    padding: 1rem 1rem 0.92rem;
+    border-bottom: 1px solid var(--glass-border);
+    background:
+        radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.2), transparent 50%),
+        radial-gradient(circle at 100% 20%, rgba(16, 185, 129, 0.16), transparent 46%);
+}
+
+.health-chatbot__header h4 {
+    margin: 0;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.08rem;
+}
+
+.health-chatbot__header p {
+    margin: 0.24rem 0 0;
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    max-width: 540px;
+}
+
+.health-chatbot__header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.health-chatbot__status {
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #047857;
+    background: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    border-radius: 999px;
+    padding: 0.24rem 0.56rem;
+}
+
+.health-chatbot__clear-btn {
+    padding: 0.34rem 0.64rem;
+    font-size: 0.8rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--glass-bg) 92%, transparent);
+    color: var(--text-primary);
+}
+
+.health-chatbot__clear-btn:hover:enabled {
+    border-color: color-mix(in srgb, var(--primary-color) 38%, transparent);
+}
+
+.health-chatbot__quick-prompts {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(220px, 1fr);
+    gap: 0.58rem;
+    overflow-x: auto;
+    padding: 0.78rem 0.95rem 0.78rem;
+    border-bottom: 1px solid var(--glass-border);
+    background: color-mix(in srgb, var(--glass-bg) 92%, transparent);
+}
+
+.health-chatbot__quick-prompts::-webkit-scrollbar {
+    height: 7px;
+}
+
+.health-chatbot__quick-prompts::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35);
+    border-radius: 999px;
+}
+
+.health-chatbot__quick-prompt {
+    border: 1px solid color-mix(in srgb, var(--primary-color) 24%, transparent);
+    border-radius: 12px;
+    padding: 0.56rem 0.65rem;
+    font-size: 0.82rem;
+    text-align: left;
+    line-height: 1.3;
+    background: color-mix(in srgb, var(--glass-bg) 95%, transparent);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.health-chatbot__quick-prompt:hover:enabled {
+    transform: translateY(-1px);
+    border-color: #0284c7;
+    background: rgba(14, 165, 233, 0.09);
+}
+
+.health-chatbot__quick-prompt:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.health-chatbot__thread {
+    max-height: 390px;
+    overflow-y: auto;
+    padding: 0.95rem;
+    display: grid;
+    gap: 0.75rem;
+    background:
+        linear-gradient(180deg, color-mix(in srgb, var(--glass-bg) 90%, transparent), color-mix(in srgb, var(--glass-bg) 72%, transparent)),
+        radial-gradient(circle at 0% 0%, rgba(14, 165, 233, 0.08), transparent 44%);
+}
+
+.health-chatbot__thread::-webkit-scrollbar {
+    width: 8px;
+}
+
+.health-chatbot__thread::-webkit-scrollbar-thumb {
+    background: rgba(100, 116, 139, 0.35);
+    border-radius: 999px;
+}
+
+.health-chatbot__message-row {
+    display: grid;
+    gap: 0.28rem;
+    max-width: 88%;
+    animation: chatMessageAppear 0.24s ease;
+}
+
+.health-chatbot__message-row.is-user {
+    justify-self: end;
+}
+
+.health-chatbot__message-row.is-assistant {
+    justify-self: start;
+}
+
+.health-chatbot__message-bubble {
+    border-radius: 14px;
+    padding: 0.66rem 0.8rem;
+    font-size: 0.93rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.health-chatbot__message-row.is-user .health-chatbot__message-bubble {
+    background: linear-gradient(135deg, #0284c7, #0ea5a5);
+    color: #fff;
+}
+
+.health-chatbot__message-row.is-assistant .health-chatbot__message-bubble {
+    background: color-mix(in srgb, var(--glass-bg) 95%, transparent);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+}
+
+.health-chatbot__meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.38rem;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.health-chatbot__meta-chip {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    padding: 0.1rem 0.34rem;
+}
+
+.health-chatbot__typing {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.health-chatbot__typing .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #0ea5a5;
+    animation: chatbotBlink 1s infinite ease-in-out;
+}
+
+.health-chatbot__typing .dot:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.health-chatbot__typing .dot:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.health-chatbot__typing .label {
+    margin-left: 0.24rem;
+}
+
+.health-chatbot__composer {
+    display: grid;
+    gap: 0.58rem;
+    padding: 0.9rem 0.95rem 0.35rem;
+    border-top: 1px solid var(--glass-border);
+    background: color-mix(in srgb, var(--glass-bg) 90%, transparent);
+}
+
+.health-chatbot__input {
+    width: 100%;
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.72rem 0.8rem;
+    background: color-mix(in srgb, var(--glass-bg) 94%, transparent);
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 84px;
+    max-height: 176px;
+    margin-bottom: 0;
+}
+
+.health-chatbot__input:focus {
+    outline: none;
+    border-color: #0284c7;
+    box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.22);
+}
+
+.health-chatbot__composer-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.health-chatbot__char-count {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.health-chatbot__char-count.is-near-limit {
+    color: var(--warning-color);
+    font-weight: 700;
+}
+
+.health-chatbot__error {
+    margin: 0.35rem 0.95rem;
+    color: var(--danger-color);
+    font-size: 0.86rem;
+}
+
+.health-chatbot__global-disclaimer {
+    margin: 0.14rem 0.95rem 0.92rem;
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+}
+
+@keyframes chatbotBlink {
+    0%,
+    80%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.88);
+    }
+
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes chatMessageAppear {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 768px) {
+    .health-chatbot__header {
+        flex-direction: column;
+    }
+
+    .health-chatbot__header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .health-chatbot__quick-prompts {
+        grid-auto-columns: minmax(178px, 78%);
+    }
+
+    .health-chatbot__thread {
+        max-height: 326px;
+    }
+
+    .health-chatbot__message-row {
+        max-width: 95%;
+    }
+}

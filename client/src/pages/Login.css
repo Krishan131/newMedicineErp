@@ -1,0 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+.portal-login-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.4rem;
+    font-family: 'Manrope', sans-serif;
+    background:
+        radial-gradient(circle at 8% 8%, rgba(2, 132, 199, 0.2), transparent 34%),
+        radial-gradient(circle at 92% 10%, rgba(20, 184, 166, 0.18), transparent 32%),
+        radial-gradient(circle at 90% 92%, rgba(245, 158, 11, 0.14), transparent 26%);
+}
+
+body.dark-mode .portal-login-page {
+    background:
+        radial-gradient(circle at 8% 8%, rgba(2, 132, 199, 0.26), transparent 40%),
+        radial-gradient(circle at 92% 10%, rgba(20, 184, 166, 0.22), transparent 38%),
+        radial-gradient(circle at 90% 92%, rgba(245, 158, 11, 0.17), transparent 34%);
+}
+
+.portal-login-card {
+    width: min(400px, 100%);
+    padding: 0;
+    overflow: hidden;
+}
+
+.portal-login-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--glass-border);
+    background: color-mix(in srgb, var(--glass-bg) 94%, transparent);
+}
+
+.portal-login-tab {
+    flex: 1;
+    padding: 0.84rem;
+    text-align: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border-bottom: 2px solid transparent;
+}
+
+.portal-login-tab:hover {
+    color: var(--text-primary);
+}
+
+.portal-login-tab.is-active {
+    color: #0284c7;
+    border-bottom-color: #0284c7;
+    background: rgba(2, 132, 199, 0.08);
+}
+
+.portal-login-body {
+    padding: 1.5rem 1.35rem 1.25rem;
+}
+
+.portal-login-body h2 {
+    margin: 0;
+    text-align: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.55rem;
+    color: var(--text-primary);
+}
+
+.portal-login-body h4 {
+    margin: 0.34rem 0 1.05rem;
+    text-align: center;
+    font-size: 0.94rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.portal-login-error {
+    margin-bottom: 0.88rem;
+    border-radius: 10px;
+    padding: 0.62rem 0.72rem;
+    color: #b91c1c;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.1);
+    font-size: 0.86rem;
+    text-align: center;
+}
+
+body.dark-mode .portal-login-error {
+    color: #fecaca;
+}
+
+.portal-login-field {
+    margin-bottom: 0.9rem;
+}
+
+.portal-login-field.is-last {
+    margin-bottom: 1.2rem;
+}
+
+.portal-login-field label {
+    margin-bottom: 0.38rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.portal-login-submit {
+    width: 100%;
+    min-height: 44px;
+}
+
+.portal-login-footer {
+    margin-top: 0.95rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.portal-login-footer a {
+    color: #0284c7;
+    font-weight: 700;
+}
+
+.portal-login-footer a:hover {
+    text-decoration: underline;
+}

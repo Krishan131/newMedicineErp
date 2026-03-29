@@ -15,6 +15,9 @@ import './App.css';
 import CustomerDashboard from './pages/customer/CustomerDashboard';
 import CustomerRegister from './pages/customer/CustomerRegister';
 import CustomerProfile from './pages/customer/CustomerProfile';
+import CustomerHistory from './pages/customer/CustomerHistory';
+import CustomerReminders from './pages/customer/CustomerReminders';
+import CustomerChatPage from './pages/customer/CustomerChatPage';
 import RetailerProfile from './pages/RetailerProfile';
 
 function App() {
@@ -27,6 +30,9 @@ function App() {
                         <Route path="/register" element={<Register />} />
                         <Route path="/customer/register" element={<CustomerRegister />} />
                         <Route path="/customer/dashboard" element={<CustomerPrivateRoute><CustomerDashboard /></CustomerPrivateRoute>} />
+                        <Route path="/customer/history" element={<CustomerPrivateRoute><CustomerHistory /></CustomerPrivateRoute>} />
+                        <Route path="/customer/reminders" element={<CustomerPrivateRoute><CustomerReminders /></CustomerPrivateRoute>} />
+                        <Route path="/customer/chat" element={<CustomerPrivateRoute><CustomerChatPage /></CustomerPrivateRoute>} />
                         <Route path="/customer/profile" element={<CustomerPrivateRoute><CustomerProfile /></CustomerPrivateRoute>} />
                         <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
                         <Route path="/retailer/profile" element={<PrivateRoute><RetailerProfile /></PrivateRoute>} />

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../api/api';
 import AuthContext from '../../context/AuthContext';
 import ThemeContext from '../../context/ThemeContext';
+import { buildCustomerCacheKey, readCustomerCache, writeCustomerCache } from '../../utils/customerCache';
+import './CustomerDashboard.css';
 
 const getInitials = (name = '') => {
     const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -14,41 +16,34 @@ const getInitials = (name = '') => {
 const CustomerDashboard = () => {
     const { customer, customerLoading, customerLogout } = useContext(AuthContext);
     const { isDarkMode, toggleTheme } = useContext(ThemeContext);
-    const [activeTab, setActiveTab] = useState('history');
-    const [history, setHistory] = useState([]);
-    const [reminders, setReminders] = useState([]);
-    const [thresholdDays, setThresholdDays] = useState(15);
     const [searchTerm, setSearchTerm] = useState('');
     const [searchRadiusKm, setSearchRadiusKm] = useState(5);
     const [searchResults, setSearchResults] = useState([]);
     const [searchLoading, setSearchLoading] = useState(false);
     const [searchError, setSearchError] = useState('');
     const [locationState, setLocationState] = useState({
-        isLocationEnabled: false,
-        location: null
+        isLocationEnabled: !!customer?.isLocationEnabled,
+        location: customer?.location || null
     });
-    const [loading, setLoading] = useState(true);
+    const [locationLoading, setLocationLoading] = useState(false);
     const [error, setError] = useState('');
-    const [consumingKey, setConsumingKey] = useState('');
     const navigate = useNavigate();
-
-    const fetchHistory = async () => {
-        const res = await api.get('/customer/history');
-        setHistory(res.data);
-    };
-
-    const fetchReminders = async () => {
-        const res = await api.get('/customer/reminders');
-        setThresholdDays(res.data.thresholdDays || 15);
-        setReminders(res.data.reminders || []);
-    };
 
     const fetchCustomerLocationState = async () => {
         const res = await api.get('/customer/me');
-        setLocationState({
+        const locationPayload = {
             isLocationEnabled: !!res.data.customer?.isLocationEnabled,
             location: res.data.customer?.location || null
-        });
+        };
+
+        setLocationState(locationPayload);
+
+        if (customer?.id) {
+            writeCustomerCache(
+                buildCustomerCacheKey(customer.id, 'locationState'),
+                locationPayload
+            );
+        }
     };
 
     useEffect(() => {
@@ -60,16 +55,43 @@ const CustomerDashboard = () => {
     useEffect(() => {
         if (!customer) return;
 
+        setLocationState({
+            isLocationEnabled: !!customer.isLocationEnabled,
+            location: customer.location || null
+        });
+
+        const cachedLocation = readCustomerCache(
+            buildCustomerCacheKey(customer.id, 'locationState'),
+            5 * 60 * 1000
+        );
+
+        if (cachedLocation) {
+            setLocationState(cachedLocation);
+        }
+
+        const cachedSearch = readCustomerCache(
+            buildCustomerCacheKey(customer.id, 'searchState'),
+            10 * 60 * 1000
+        );
+
+        if (cachedSearch) {
+            setSearchTerm(cachedSearch.searchTerm || '');
+            setSearchRadiusKm(cachedSearch.searchRadiusKm || 5);
+            setSearchResults(cachedSearch.searchResults || []);
+        }
+
         const loadData = async () => {
-            setLoading(true);
+            setLocationLoading(true);
             setError('');
             try {
-                await Promise.all([fetchHistory(), fetchReminders(), fetchCustomerLocationState()]);
+                await fetchCustomerLocationState();
             } catch (err) {
                 console.error('Failed to fetch customer data', err);
-                setError('Failed to load customer dashboard data.');
+                if (!cachedLocation) {
+                    setError('Failed to load customer dashboard data.');
+                }
             } finally {
-                setLoading(false);
+                setLocationLoading(false);
             }
         };
 
@@ -79,19 +101,6 @@ const CustomerDashboard = () => {
     const handleLogout = () => {
         customerLogout();
         navigate('/login');
-    };
-
-    const handleMarkConsumed = async (saleId, itemIndex, itemKey) => {
-        try {
-            setConsumingKey(itemKey);
-            await api.patch('/customer/reminders/consume', { saleId, itemIndex });
-            setReminders((prev) => prev.filter((item) => item.itemKey !== itemKey));
-        } catch (err) {
-            console.error('Failed to mark reminder as consumed', err);
-            alert(err.response?.data?.msg || 'Failed to mark reminder as consumed');
-        } finally {
-            setConsumingKey('');
-        }
     };
 
     const handleSearchMedicines = async (e) => {
@@ -122,8 +131,16 @@ const CustomerDashboard = () => {
                 }
             });
 
-            setSearchResults(res.data.results || []);
-            setActiveTab('search');
+            const nextResults = res.data.results || [];
+            setSearchResults(nextResults);
+
+            if (customer?.id) {
+                writeCustomerCache(buildCustomerCacheKey(customer.id, 'searchState'), {
+                    searchTerm: searchTerm.trim(),
+                    searchRadiusKm: Number(searchRadiusKm),
+                    searchResults: nextResults
+                });
+            }
         } catch (err) {
             console.error('Medicine search failed', err);
             setSearchResults([]);
@@ -138,116 +155,92 @@ const CustomerDashboard = () => {
         alert(`Buy option from ${result.shopName}\nDistance: ${result.distanceKm} km\nAddress: ${shopAddress}\nPhone: ${result.shopPhone || 'Not available'}`);
     };
 
-    const getStatusStyle = (status) => {
-        if (status === 'expired') {
-            return { color: 'var(--danger-color)', fontWeight: 'bold' };
-        }
-
-        if (status === 'expiring-soon') {
-            return { color: '#f39c12', fontWeight: 'bold' };
-        }
-
-        return { color: 'var(--success-color)', fontWeight: 'bold' };
-    };
-
-    if (customerLoading || loading) {
-        return <div className="container" style={{ textAlign: 'center', marginTop: '50px' }}>Loading dashboard...</div>;
+    if (customerLoading) {
+        return <div className="container customer-dashboard-loading">Loading dashboard...</div>;
     }
 
     return (
-        <div>
-            <nav style={{
-                background: 'var(--card-bg)',
-                padding: '1rem 2rem',
-                boxShadow: '0 2px 10px rgba(0,0,0,0.05)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                position: 'sticky',
-                top: 0,
-                zIndex: 100
-            }}>
-                <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--primary-color)' }}>
-                    Customer Dashboard
+        <div className="customer-dashboard-page">
+            <nav className="customer-dashboard-nav">
+                <div className="customer-dashboard-brand">
+                    <div className="customer-dashboard-brand-title">Customer Dashboard</div>
+                    <div className="customer-dashboard-brand-subtitle">Search medicines nearby and view live results</div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            background: 'var(--card-bg)',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '999px',
-                            padding: '5px 10px'
-                        }}
+                <div className="customer-dashboard-actions">
+                    <button
+                        type="button"
+                        className="customer-dashboard-user-chip customer-dashboard-profile-trigger"
+                        onClick={() => navigate('/customer/profile')}
+                        title="Open profile"
                     >
-                        <div
-                            style={{
-                                width: '30px',
-                                height: '30px',
-                                borderRadius: '50%',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))',
-                                color: '#fff',
-                                fontWeight: '700',
-                                fontSize: '0.78rem'
-                            }}
-                        >
+                        <div className="customer-dashboard-avatar">
                             {getInitials(customer?.name || '')}
                         </div>
-                        <div style={{ lineHeight: 1.15 }}>
-                            <div style={{ fontSize: '0.82rem', fontWeight: '600' }}>{customer?.name || 'Customer'}</div>
-                            <div style={{ fontSize: '0.74rem', opacity: 0.7 }}>{customer?.phone || ''}</div>
+                        <div className="customer-dashboard-user-meta">
+                            <div className="customer-dashboard-user-label">Profile</div>
+                            <div className="customer-dashboard-user-name">{customer?.name || 'Customer'}</div>
                         </div>
-                    </div>
+                    </button>
                     <button
-                        className="btn"
+                        className="btn customer-dashboard-toolbar-btn customer-dashboard-theme-btn"
                         onClick={toggleTheme}
-                        style={{
-                            padding: '5px 10px',
-                            fontSize: '0.82rem',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                        }}
+                        aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
                         title="Toggle light/dark mode"
                     >
-                        <span>{isDarkMode ? '🌞' : '🌙'}</span>
-                        <span>{isDarkMode ? 'Light' : 'Dark'}</span>
+                        {isDarkMode ? '🌞' : '🌙'}
                     </button>
-                    <button
-                        className="btn"
-                        onClick={() => navigate('/customer/profile')}
-                        style={{ padding: '5px 10px', fontSize: '0.9rem' }}
-                    >
-                        Profile
-                    </button>
-                    <button onClick={handleLogout} className="btn-danger" style={{ padding: '5px 10px', fontSize: '0.9rem' }}>
+                    <button onClick={handleLogout} className="btn-danger customer-dashboard-logout-btn">
                         Logout
                     </button>
                 </div>
             </nav>
 
-            <div className="container" style={{ marginTop: '2rem', paddingBottom: '3rem' }}>
-                {error && <div style={{ color: 'var(--danger-color)', marginBottom: '1rem' }}>{error}</div>}
+            <div className="container customer-dashboard-container">
+                {error && <div className="customer-dashboard-alert is-error">{error}</div>}
 
-                <div className="card" style={{ marginBottom: '1.5rem' }}>
-                    <h4 style={{ marginBottom: '0.75rem' }}>Search Medicines from Live Shops</h4>
-                    <form onSubmit={handleSearchMedicines} style={{ display: 'grid', gap: '0.75rem', gridTemplateColumns: '2fr 1fr auto', alignItems: 'end' }}>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
+                <div className="customer-dashboard-tabs" role="tablist" aria-label="Customer portal pages">
+                    <button
+                        className="btn customer-dashboard-tab is-active"
+                        onClick={() => navigate('/customer/dashboard')}
+                    >
+                        Search & Results
+                    </button>
+                    <button
+                        className="btn customer-dashboard-tab"
+                        onClick={() => navigate('/customer/history')}
+                    >
+                        Purchase History
+                    </button>
+                    <button
+                        className="btn customer-dashboard-tab"
+                        onClick={() => navigate('/customer/reminders')}
+                    >
+                        Reminders
+                    </button>
+                    <button
+                        className="btn customer-dashboard-tab"
+                        onClick={() => navigate('/customer/chat')}
+                    >
+                        Medi Chat
+                    </button>
+                </div>
+
+                <div className="card customer-dashboard-search-panel">
+                    <div className="customer-dashboard-panel-head">
+                        <h4 className="customer-dashboard-panel-title">Search Medicines from Live Shops</h4>
+                        <p className="customer-dashboard-panel-subtitle">Find nearby availability with live stock and distance</p>
+                    </div>
+                    <form onSubmit={handleSearchMedicines} className="customer-dashboard-search-form">
+                        <div className="form-group customer-dashboard-form-group">
                             <label>Medicine Name</label>
                             <input
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 placeholder="Search for a medicine"
-                                style={{ marginBottom: 0 }}
                             />
                         </div>
-                        <div className="form-group" style={{ marginBottom: 0 }}>
+                        <div className="form-group customer-dashboard-form-group">
                             <label>Radius (km)</label>
                             <input
                                 type="number"
@@ -255,7 +248,6 @@ const CustomerDashboard = () => {
                                 max="100"
                                 value={searchRadiusKm}
                                 onChange={(e) => setSearchRadiusKm(e.target.value)}
-                                style={{ marginBottom: 0 }}
                             />
                         </div>
                         <button type="submit" className="btn btn-primary" disabled={searchLoading}>
@@ -264,185 +256,58 @@ const CustomerDashboard = () => {
                     </form>
 
                     {!locationState.isLocationEnabled && (
-                        <small style={{ display: 'block', marginTop: '0.75rem', color: 'var(--danger-color)' }}>
+                        <small className="customer-dashboard-search-note is-error">
                             Location is required for nearby shop search. Set it in your profile first.
                         </small>
                     )}
 
                     {searchError && (
-                        <div style={{ marginTop: '0.75rem', color: 'var(--danger-color)' }}>{searchError}</div>
+                        <div className="customer-dashboard-search-note is-error">{searchError}</div>
+                    )}
+
+                    {locationLoading && !searchError && (
+                        <div className="customer-dashboard-search-note">Refreshing your location settings...</div>
                     )}
                 </div>
 
-                <div className="grid-responsive" style={{ marginBottom: '1.5rem' }}>
-                    <div className="card" style={{ borderLeft: '4px solid var(--primary-color)' }}>
-                        <h4 style={{ marginBottom: '0.5rem' }}>Total Purchases</h4>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{history.length}</div>
+                {searchResults.length === 0 ? (
+                    <div className="customer-dashboard-empty is-compact">
+                        <h3>No search results yet.</h3>
+                        <p>Search for a medicine to see nearby live shop results.</p>
                     </div>
-                    <div className="card" style={{ borderLeft: '4px solid #f39c12' }}>
-                        <h4 style={{ marginBottom: '0.5rem' }}>Active Reminders</h4>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>{reminders.length}</div>
-                    </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '10px', marginBottom: '1rem' }}>
-                    <button
-                        className="btn"
-                        onClick={() => setActiveTab('history')}
-                        style={{
-                            background: activeTab === 'history' ? 'var(--primary-color)' : 'var(--card-bg)',
-                            color: activeTab === 'history' ? '#fff' : 'var(--text-color)',
-                            border: '1px solid var(--border-color)'
-                        }}
-                    >
-                        Purchase History
-                    </button>
-                    <button
-                        className="btn"
-                        onClick={() => setActiveTab('reminders')}
-                        style={{
-                            background: activeTab === 'reminders' ? 'var(--primary-color)' : 'var(--card-bg)',
-                            color: activeTab === 'reminders' ? '#fff' : 'var(--text-color)',
-                            border: '1px solid var(--border-color)'
-                        }}
-                    >
-                        Reminders (Expiring in {thresholdDays} days)
-                    </button>
-                    <button
-                        className="btn"
-                        onClick={() => setActiveTab('search')}
-                        style={{
-                            background: activeTab === 'search' ? 'var(--primary-color)' : 'var(--card-bg)',
-                            color: activeTab === 'search' ? '#fff' : 'var(--text-color)',
-                            border: '1px solid var(--border-color)'
-                        }}
-                    >
-                        Search Results ({searchResults.length})
-                    </button>
-                </div>
-
-                {activeTab === 'history' && (
-                    history.length === 0 ? (
-                        <div style={{ textAlign: 'center', marginTop: '50px', opacity: 0.6 }}>
-                            <h3>No purchases found.</h3>
-                            <p>Make your first purchase to see history here.</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'grid', gap: '1.5rem' }}>
-                            {history.map((invoice) => (
-                                <div key={invoice._id} className="card">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>
-                                        <div>
-                                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem' }}>
-                                                {invoice.soldBy?.shopName || 'Medicine Shop'}
-                                            </div>
-                                            <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>
-                                                {new Date(invoice.createdAt).toLocaleDateString()} at {new Date(invoice.createdAt).toLocaleTimeString()}
-                                            </div>
-                                        </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontWeight: 'bold', color: 'var(--primary-color)', fontSize: '1.2rem' }}>
-                                                ₹{invoice.totalAmount}
-                                            </div>
-                                            <div style={{ fontSize: '0.8rem', opacity: 0.7 }}>
-                                                {invoice.items.length} Items
-                                            </div>
-                                        </div>
-                                    </div>
-
+                ) : (
+                    <div className="customer-dashboard-search-list">
+                        {searchResults.map((result) => (
+                            <div key={`${result.shopId}-${result.medicineId}`} className="card customer-dashboard-result-card">
+                                <div className="customer-dashboard-result-content">
                                     <div>
-                                        {invoice.items.map((item, idx) => (
-                                            <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.95rem' }}>
-                                                <span>{item.quantity} x {item.name}</span>
-                                                <span style={{ opacity: 0.8 }}>₹{item.total}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )
-                )}
-
-                {activeTab === 'reminders' && (
-                    reminders.length === 0 ? (
-                        <div style={{ textAlign: 'center', marginTop: '50px', opacity: 0.6 }}>
-                            <h3>No active reminders.</h3>
-                            <p>You're all set for now.</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {reminders.map((reminder) => (
-                                <div key={reminder.itemKey} className="card">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
-                                        <h4 style={{ margin: 0 }}>{reminder.medicineName}</h4>
-                                        <span style={getStatusStyle(reminder.status)}>
-                                            {reminder.status === 'expiring-soon' && `Expiring Soon (${reminder.daysLeft} days left)`}
-                                            {reminder.status === 'expired' && `Expired (${Math.abs(reminder.daysLeft)} days ago)`}
-                                            {reminder.status === 'safe' && `Safe (${reminder.daysLeft} days left)`}
-                                        </span>
-                                    </div>
-
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '8px', marginBottom: '1rem', fontSize: '0.92rem' }}>
-                                        <div><strong>Quantity:</strong> {reminder.quantity}</div>
-                                        <div><strong>Purchased:</strong> {new Date(reminder.purchaseDate).toLocaleDateString()}</div>
-                                        <div><strong>Expiry:</strong> {new Date(reminder.expiryDate).toLocaleDateString()}</div>
-                                        <div><strong>Shop:</strong> {reminder.shopName}</div>
-                                    </div>
-
-                                    <button
-                                        className="btn btn-success"
-                                        onClick={() => handleMarkConsumed(reminder.saleId, reminder.itemIndex, reminder.itemKey)}
-                                        disabled={consumingKey === reminder.itemKey}
-                                    >
-                                        {consumingKey === reminder.itemKey ? 'Saving...' : 'Mark as consumed'}
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )
-                )}
-
-                {activeTab === 'search' && (
-                    searchResults.length === 0 ? (
-                        <div style={{ textAlign: 'center', marginTop: '35px', opacity: 0.65 }}>
-                            <h3>No matching medicines found in live nearby shops.</h3>
-                            <p>Try changing medicine name or increasing radius.</p>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'grid', gap: '1rem' }}>
-                            {searchResults.map((result) => (
-                                <div key={`${result.shopId}-${result.medicineId}`} className="card">
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', gap: '1rem', flexWrap: 'wrap' }}>
-                                        <div>
-                                            <h4 style={{ marginBottom: '0.35rem' }}>{result.medicineName}</h4>
-                                            <div style={{ opacity: 0.85, marginBottom: '0.35rem' }}>
-                                                Available at <strong>{result.shopName}</strong>
-                                            </div>
-                                            <div style={{ fontSize: '0.9rem', opacity: 0.75 }}>
-                                                {result.shopAddress || 'Address not available'}
-                                            </div>
-                                            <div style={{ fontSize: '0.9rem', opacity: 0.75 }}>
-                                                Distance: <strong>{result.distanceKm} km</strong>
-                                            </div>
-                                            <div style={{ fontSize: '0.9rem', opacity: 0.75 }}>
-                                                Stock: {result.quantity} | Expiry: {result.expiryDate ? new Date(result.expiryDate).toLocaleDateString() : 'N/A'}
-                                            </div>
+                                        <h4 className="customer-dashboard-result-name">{result.medicineName}</h4>
+                                        <div className="customer-dashboard-result-shop">
+                                            Available at <strong>{result.shopName}</strong>
                                         </div>
-
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '1.3rem', fontWeight: '700', color: 'var(--primary-color)', marginBottom: '0.65rem' }}>
-                                                ₹{result.price}
-                                            </div>
-                                            <button className="btn btn-primary" onClick={() => handleBuyOption(result)}>
-                                                Buy from this store
-                                            </button>
+                                        <div className="customer-dashboard-result-meta">
+                                            {result.shopAddress || 'Address not available'}
+                                        </div>
+                                        <div className="customer-dashboard-result-meta">
+                                            Distance: <strong>{result.distanceKm} km</strong>
+                                        </div>
+                                        <div className="customer-dashboard-result-meta">
+                                            Stock: {result.quantity} | Expiry: {result.expiryDate ? new Date(result.expiryDate).toLocaleDateString() : 'N/A'}
                                         </div>
                                     </div>
+
+                                    <div className="customer-dashboard-result-price-wrap">
+                                        <div className="customer-dashboard-result-price">
+                                            ₹{result.price}
+                                        </div>
+                                        <button className="btn btn-primary" onClick={() => handleBuyOption(result)}>
+                                            Buy from this store
+                                        </button>
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                    )
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         </div>

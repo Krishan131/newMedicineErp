@@ -11,6 +11,7 @@ const {
 	searchMedicinesFromLiveShops,
 	getCustomerHistory,
 	getCustomerReminders,
+	customerChat,
 	markReminderConsumed
 } = require('../controllers/customerController');
 
@@ -23,6 +24,7 @@ router.patch('/location', customerAuth, updateCustomerLocation);
 router.get('/search-medicines', customerAuth, searchMedicinesFromLiveShops);
 router.get('/history', customerAuth, getCustomerHistory);
 router.get('/reminders', customerAuth, getCustomerReminders);
+router.post('/chat', customerAuth, customerChat);
 router.patch('/reminders/consume', customerAuth, markReminderConsumed);
 
 module.exports = router;
